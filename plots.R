@@ -60,25 +60,29 @@ get_bar_plot <- function(playlist) {
   trial <- rbind(trial, maxi)
   trial <- rbind(trial, mini)
   
-  ggplot(df, aes(x=Variable, y=Value)) + geom_bar(stat="identity") + ylim(-2, 2)
+  ggplot(df, aes(x=Variable, y=Value)) + geom_bar(stat="identity") + ylim(-2, 2) #can't get the colors to work for some reason
   
   }
 
+
+
+
 get_lines <- function(dob) {
-  ggplot(dob, aes(x=c(1:nrow(dob)))) + 
-    geom_line(aes(y=valence), color='dark red') + 
-    geom_line(aes(y=acousticness), color='magenta') + 
-    geom_line(aes(y=danceability), color='cyan') + 
-    geom_line(aes(y=energy), color='coral') + 
-    geom_line(aes(y=instrumentalness), color='violet') + 
-    geom_line(aes(y=key), color='yellowgreen') + 
-    geom_line(aes(y=liveness), color='burlywood') + 
-    geom_line(aes(y=loudness), color='wheat') + 
-    geom_line(aes(y=popularity), color='dark blue') + 
-    geom_line(aes(y=speechiness), color='dimgray') + 
-    geom_line(aes(y=tempo), color='chocolate') + 
-    ylim(-2,2)
   
+  dob$'song #' = c(1:nrow(dob))
+  valence <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=valence), color='dark red') + ylim(-2, 2)
+  acousticness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=acousticness), color='dark red') + ylim(-2, 2)
+  danceability <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=danceability), color='dark red') + ylim(-2, 2)
+  energy <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=energy), color='dark red') + ylim(-2, 2)
+  instrumentalness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=instrumentalness), color='dark red') + ylim(-2, 2)
+  key <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=key), color='dark red') + ylim(-2, 2)
+  liveness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=liveness), color='dark red') + ylim(-2, 2)
+  loudness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=loudness), color='dark red') + ylim(-2, 2)
+  popularity <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=popularity), color='dark red') + ylim(-2, 2)
+  speechiness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=speechiness), color='dark red') + ylim(-2, 2)
+  tempo <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=tempo), color='dark red') + ylim(-2, 2)
+  ggarrange(valence, acousticness, danceability, energy, instrumentalness, key, liveness, loudness, popularity, speechiness,
+            tempo, ncol=3, nrow=4)
   
 }
 
