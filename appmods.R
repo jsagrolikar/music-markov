@@ -414,17 +414,17 @@ ui <- fluidPage(
                                                                                             min = -1,
                                                                                             max = 1,
                                                                                             value = 0, step = 0.01, width = 105, ticks=F)),
-            div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("energy_coeff",
-                                                                                            "Energy",
-                                                                                            min = -1,
-                                                                                            max = 1,
-                                                                                            value = 0, step = 0.01, width = 105, ticks=F)),
+            
             div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("instrumentalness_coeff",
                                                                                             "Instrumentalness",
                                                                                             min = -1,
                                                                                             max = 1,
                                                                                             value = 0, step = 0.01, width = 105, ticks=F)),
-            
+            div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("energy_coeff",
+                                                                                            "Energy",
+                                                                                            min = -1,
+                                                                                            max = 1,
+                                                                                            value = 0, step = 0.01, width = 105, ticks=F)),
             
             
             div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("liveness_coeff",
@@ -458,12 +458,28 @@ ui <- fluidPage(
         
         # Show a plot of the generated distribution
         mainPanel(
+          tabsetPanel(tabPanel("Main",
             actionButton("button", "Generate Mix"), br(), br(), br(), DT::dataTableOutput("playlist_table"), 
             # fluidRow(
             #   splitLayout(cellWidths = c("100%", "0%"), plotOutput("lines"), plotOutput("bar"))
             # )
-            plotOutput("lines")
-        ),
+            plotOutput("lines")),
+            tabPanel("About",
+                     h2("Instructions", align="center"), h3("Use the sliders on the left panel to toggle the inputs for the seed of the Markov Chain. 
+                                                            At each stage, the cost function in the algorithm will seek to minimize the distance between those
+                                                            inputs and the segment of the dataset produced by a probability distribution. Happy listening!"), 
+                     h2("Data", align="center"), h3("The data for this project was collected using Spotify's public API. The characteristics on the previous page
+                                                    is precisely the data that Spotify decides to collect. Spotify does collect 'key' data on songs, which we chose to omit
+                                                    since a clear gradient cannot be formed. The goal of the generator is to create a diverse set of songs using a combination
+                                                    of initial input and randomness. For revenue purposes, music streaming services are heavily incentivized to pigeonhole
+                                                    listeners into their current tastes, which heavily loses the ability to diversify one's music tastes (without
+                                                    actively seeking to do so, that is). Hopefully, this makes it easier."),
+                     h2("Visuals", align="center"), h3("The bar plot on the side panel gives an idea of your generated mix's deviation from the entire Spotify dataset. For
+                                                       example, an 'acousticness' bar stretching far to the right means that your playlist has a much higher than average
+                                                       acousticness compared to the dataset as a whole. The plots below the playlist showcase how each Spotify
+                                                       characteristic changes over the length of the playlist. Longer playlists tend to give more time for trends
+                                                       to form in this regard, especially since there are chances data was not collected for particular songs."))
+        )),
       
     )
 )
@@ -499,8 +515,6 @@ server <- function(input, output, session) {
     observeEvent(input$button, {
       output$bar = renderPlot(get_bar_plot(playlist_vals_gen(selectedData())))
     })
-    
-    
     
 }
 
