@@ -465,20 +465,21 @@ ui <- fluidPage(
             # )
             plotOutput("lines")),
             tabPanel("About",
-                     h2("Instructions", align="center"), h3("Use the sliders on the left panel to toggle the inputs for the seed of the Markov Chain. 
-                                                            At each stage, the cost function in the algorithm will seek to minimize the distance between those
-                                                            inputs and the segment of the dataset produced by a probability distribution. Happy listening!"), 
-                     h2("Data", align="center"), h3("The data for this project was collected using Spotify's public API. The characteristics on the previous page
-                                                    is precisely the data that Spotify decides to collect. Spotify does collect 'key' data on songs, which we chose to omit
-                                                    since a clear gradient cannot be formed. The goal of the generator is to create a diverse set of songs using a combination
-                                                    of initial input and randomness. For revenue purposes, music streaming services are heavily incentivized to pigeonhole
-                                                    listeners into their current tastes, which heavily loses the ability to diversify one's music tastes (without
-                                                    actively seeking to do so, that is). Hopefully, this makes it easier."),
-                     h2("Visuals", align="center"), h3("The bar plot on the side panel gives an idea of your generated mix's deviation from the entire Spotify dataset. For
+                     h2("Instructions", align="center"), h4("Use the sliders on the side panel to toggle the inputs for the seed of the Markov Chain. 
+                                                            At each stage, the algorithm will seek to minimize the distance between those
+                                                            inputs and a segment of the entire spotify dataset. The result becomes a diversified Markov Mix of songs. The goal of 
+                                                            the generator is to create a diverse set of songs using a combination
+                                                    of initial input and randomness. Music streaming services are heavily incentivized to pigeonhole
+                                                    listeners into their current tastes, which limits the ability to diversify one's music tastes. We
+                                                            use the randomness component to try and break this mold."), 
+                     h2("Data", align="center"), h4("The data for the algorithm was collected using Spotify's API. The input parameters are the data that Spotify
+                    collects on songs. We used all of Spotify's parameters with the exception of 'key' (this was done for practical reasons; though 'key'=0 means C,
+                     'key'=1 means C#/Db, and so on, our numerical similarity metrics break down when classifying songs in this way)."),
+                     h2("Visuals", align="center"), h4("The bar chart on the side panel presents an idea of how your Markov Mix deviates from the entire Spotify dataset. For
                                                        example, an 'acousticness' bar stretching far to the right means that your playlist has a much higher than average
-                                                       acousticness compared to the dataset as a whole. The plots below the playlist showcase how each Spotify
-                                                       characteristic changes over the length of the playlist. Longer playlists tend to give more time for trends
-                                                       to form in this regard, especially since there are chances data was not collected for particular songs."))
+                                                       acousticness compared to the entire dataset. The plots below the playlist showcase how each Spotify parameter
+                                                       changes over the length of the playlist. Longer playlists tend to give more time for trends
+                                                       to form, but the aim is for those movements to be diverse and unpredictable."))
         )),
       
     )
