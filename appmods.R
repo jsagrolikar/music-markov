@@ -10,7 +10,7 @@ library(ggpubr)
 net_distance <- function(song1, song2) {
   dist <- sqrt(((song1$valence)-song2$valence)^2+(as.vector(song1$acousticness)-song2$acousticness)^2+
          (as.vector(song1$danceability)-song2$danceability)^2+(as.vector(song1$energy)-song2$energy)^2+
-         (as.vector(song1$instrumentalness)-song2$instrumentalness)^2+(as.vector(song1$key)-song2$key)^2+
+         (as.vector(song1$instrumentalness)-song2$instrumentalness)^2+
          (as.vector(song1$liveness)-song2$liveness)^2+(as.vector(song1$loudness)-song2$loudness)^2+
          (as.vector(song1$popularity)-song2$popularity)^2+(as.vector(song1$speechiness)-song2$speechiness)^2+
          (as.vector(song1$tempo)-song2$tempo)^2)
@@ -23,13 +23,17 @@ all_song_quant_df <- rbind(sq_df1, sq_df2)
 
 all_gen_quant_df <- read.csv("https://raw.githubusercontent.com/jsagrolikar/music-markov/main/upload_gen_df.csv")
 all_gen_quant_df <- all_gen_quant_df[all_gen_quant_df$genres%in%(unique(all_song_quant_df$genres)),]
+
+all_song_quant_df <- all_song_quant_df[, !(names(all_song_quant_df)=="key")]
+all_gen_quant_df <- all_gen_quant_df[, !(names(all_gen_quant_df)=="key")]
+
 gen_ss_mat <- matrix(nrow = nrow(all_gen_quant_df), ncol = nrow(all_gen_quant_df))
 gen_ss_list <- list()
 for (gen_id in 1:nrow(all_gen_quant_df)) {
     spec_gen_df <- all_gen_quant_df[gen_id,]
     gen_ss <- sqrt((as.vector(spec_gen_df$valence)-all_gen_quant_df$valence)^2+(as.vector(spec_gen_df$acousticness)-all_gen_quant_df$acousticness)^2+
                        (as.vector(spec_gen_df$danceability)-all_gen_quant_df$danceability)^2+(as.vector(spec_gen_df$energy)-all_gen_quant_df$energy)^2+
-                       (as.vector(spec_gen_df$instrumentalness)-all_gen_quant_df$instrumentalness)^2+(as.vector(spec_gen_df$key)-all_gen_quant_df$key)^2+
+                       (as.vector(spec_gen_df$instrumentalness)-all_gen_quant_df$instrumentalness)^2+
                        (as.vector(spec_gen_df$liveness)-all_gen_quant_df$liveness)^2+(as.vector(spec_gen_df$loudness)-all_gen_quant_df$loudness)^2+
                        (as.vector(spec_gen_df$popularity)-all_gen_quant_df$popularity)^2+(as.vector(spec_gen_df$speechiness)-all_gen_quant_df$speechiness)^2+
                        (as.vector(spec_gen_df$tempo)-all_gen_quant_df$tempo)^2)
@@ -73,15 +77,15 @@ markovplaylist_fun <- function(input_song, playlist_length){
     order_df <- data.frame(id=unlist(play_song_list), order=c(1:playlist_length))
     returned_playlist_full_info_df <- merge(returned_playlist_full_info_df, order_df, by=c("id"))
     returned_playlist_full_info_df <- returned_playlist_full_info_df[order(returned_playlist_full_info_df$order),]
-    display_df <- returned_playlist_full_info_df[,c(15,14,13)]
+    display_df <- returned_playlist_full_info_df[, c(14, 13, 12)]
     return(display_df)
 }
 
-markovDay_fun <- function(valence_coeff, acousticness_coeff,danceability_coeff,energy_coeff,instrumentalness_coeff,key_coeff,liveness_coeff,loudness_coeff,
+markovDay_fun <- function(valence_coeff, acousticness_coeff,danceability_coeff,energy_coeff,instrumentalness_coeff, liveness_coeff,loudness_coeff,
                           popularity_coeff,speechiness_coeff, tempo_coeff, playlist_length){
     all_song_inp_ss <- sqrt((valence_coeff-all_song_quant_df$valence)^2+(acousticness_coeff-all_song_quant_df$acousticness)^2+
              (danceability_coeff-all_song_quant_df$danceability)^2+(energy_coeff-all_song_quant_df$energy)^2+
-             (instrumentalness_coeff-all_song_quant_df$instrumentalness)^2+(key_coeff-all_song_quant_df$key)^2+
+             (instrumentalness_coeff-all_song_quant_df$instrumentalness)^2+
              (liveness_coeff-all_song_quant_df$liveness)^2+(loudness_coeff-all_song_quant_df$loudness)^2+
              (popularity_coeff-all_song_quant_df$popularity)^2+(speechiness_coeff-all_song_quant_df$speechiness)^2+
              (tempo_coeff-all_song_quant_df$tempo)^2)
@@ -284,7 +288,7 @@ get_bar_plot <- function(playlist) {
   trial <- rbind(trial, maxi)
   trial <- rbind(trial, mini)
   
-  diagram <- ggplot(df, aes(x=Variable, y=Value)) + geom_bar(stat="identity") + ylim(-2, 2) + coord_flip() #can't get the colors to work for some reason
+  diagram <- ggplot(df, aes(x=Variable, y=Value)) + geom_bar(stat="identity", color="#00B8E7", fill="#00B8E7") + ylim(-2, 2) + coord_flip() #can't get the colors to work for some reason
   return(diagram)
   
 }
@@ -306,7 +310,7 @@ comparison_bar <- function(allsongs, playlist) {
   trial2 <- trial2[, !(names(trial2) %in% drop)]
   avg2 <- summarise_all(trial2, mean)
   
-  bar <- as.data.frame(matrix(0, ncol=1, nrow=22))
+  bar <- as.data.frame(matrix(0, ncol=1, nrow=20))
   bar$set <- unlist(c(rep("playlist", 11), rep("dataset", 11)))
   bar$variable <- unlist(c(df$Variable, df$Variable))
   bar$value <- unlist(c(df$Value, avg2))
@@ -317,22 +321,24 @@ comparison_bar <- function(allsongs, playlist) {
   
 }
 
+
+
 get_lines <- function(dob) {
   
   dob$'song #' = c(1:nrow(dob))
-  valence <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=valence), color='dark red') + ylim(-2, 2)
-  acousticness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=acousticness), color='dark red') + ylim(-2, 2)
-  danceability <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=danceability), color='dark red') + ylim(-2, 2)
-  energy <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=energy), color='dark red') + ylim(-2, 2)
-  instrumentalness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=instrumentalness), color='dark red') + ylim(-2, 2)
-  key <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=key), color='dark red') + ylim(-2, 2)
-  liveness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=liveness), color='dark red') + ylim(-2, 2)
-  loudness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=loudness), color='dark red') + ylim(-2, 2)
-  popularity <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=popularity), color='dark red') + ylim(-2, 2)
-  speechiness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=speechiness), color='dark red') + ylim(-2, 2)
-  tempo <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=tempo), color='dark red') + ylim(-2, 2)
-  diagram <- ggarrange(valence, acousticness, danceability, energy, instrumentalness, key, liveness, loudness, popularity, speechiness,
-            tempo, ncol=6, nrow=2)
+  valence <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=valence), color='#0CB702') + ylim(-2, 2)
+  acousticness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=acousticness), color="#F8766D" ) + ylim(-2, 2)
+  danceability <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=danceability), color="#00A9FF") + ylim(-2, 2)
+  energy <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=energy), color= "#00BA38") + ylim(-2, 2)
+  instrumentalness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=instrumentalness), color= "#00BFC4" ) + ylim(-2, 2)
+  
+  liveness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=liveness), color="#619CFF") + ylim(-2, 2)
+  loudness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=loudness), color= "#F564E3") + ylim(-2, 2)
+  popularity <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=popularity), color='#C77CFF') + ylim(-2, 2)
+  speechiness <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=speechiness), color='#FF61CC') + ylim(-2, 2)
+  tempo <- ggplot(dob, aes(x=`song #`)) + geom_line(aes(y=tempo), color='#8494FF') + ylim(-2, 2)
+  diagram <- ggarrange(valence, acousticness, danceability, energy, instrumentalness,liveness, loudness, popularity, speechiness,
+            tempo, ncol=5, nrow=2)
   return(diagram)
   
 }
@@ -391,8 +397,8 @@ ui <- fluidPage(
             sliderInput("playlist_length",
                         "How Many Songs Would You Like in the Playlist?:",
                         min = 3,
-                        max = 20,
-                        value = 10), br(), h4("Rate The Importance of Each Factor from -5 to 5"), br(),
+                        max = 50,
+                        value = 10), br(), h4("Rate The Importance of Each Factor from -1 to 1"), br(),
             div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("valence_coeff",
                                                                                             "Valence",
                                                                                             min = -1,
@@ -418,11 +424,9 @@ ui <- fluidPage(
                                                                                             min = -1,
                                                                                             max = 1,
                                                                                             value = 0, step = 0.01, width = 105, ticks=F)),
-            div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("key_coeff",
-                                                                                            "Key",
-                                                                                            min = -1,
-                                                                                            max = 1,
-                                                                                            value = 0,step = 0.01,  width = 105, ticks=F)),
+            
+            
+            
             div(style="display: inline-block;vertical-align:top; width: 112px;",sliderInput("liveness_coeff",
                                                                                             "Liveness",
                                                                                             min = -1,
@@ -474,7 +478,7 @@ server <- function(input, output, session) {
     #   })
     # })
     selectedData <- reactive({
-        markovDay_fun(input$valence_coeff, input$acousticness_coeff, input$danceability_coeff,input$energy_coeff,input$instrumentalness_coeff,input$key_coeff,input$liveness_coeff,input$loudness_coeff,
+        markovDay_fun(input$valence_coeff, input$acousticness_coeff, input$danceability_coeff,input$energy_coeff,input$instrumentalness_coeff,input$liveness_coeff,input$loudness_coeff,
                       input$popularity_coeff,input$speechiness_coeff, input$tempo_coeff, input$playlist_length)
     })
     observeEvent(input$button, {
@@ -487,13 +491,13 @@ server <- function(input, output, session) {
     #         markovDiagram_fun(selectedData(), input$playlist_length)
     #     , width=500, height=800)
     # })
-
+    
     observeEvent(input$button, {
       output$lines = renderPlot(get_lines(playlist_vals_gen(selectedData())))
     })
     
     observeEvent(input$button, {
-      output$bar = renderPlot(comparison_bar(all_song_quant_df, playlist_vals_gen(selectedData())))
+      output$bar = renderPlot(get_bar_plot(playlist_vals_gen(selectedData())))
     })
     
     
